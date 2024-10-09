@@ -21,15 +21,6 @@ jobs:
             compile_riegl: "ON",
             conda_dep_file: ".ci/conda-win.yml"
           }
-          - {
-            name: "macOS Clang",
-            os: macos-latest,
-            generator: "Ninja",
-            conda_library_dir: ".",
-            compile_riegl: "OFF",
-            conda_dep_file: ".ci/conda-macos.yml"
-          }
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -117,107 +108,9 @@ jobs:
         run: cmake --install build
 
       - name: tarFiles
-        run: tar -cvf build.tar build
+        run: tar -cvf CloudCompare.tar C:/Program Files (x86)/CloudCompareProjects/CloudCompare
 
-      - name: upload-artifact
-        uses: actions/upload-artifact@v4
+      - name: CloudCompare-Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: my-artifact
-          path: build.tar
-
-  ubuntu-build:
-    name: Ubuntu ${{ matrix.compiler }} SCALAR_DOUBLE=${{ matrix.scalar_double }}
-    runs-on: ubuntu-22.04
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
-
-    strategy:
-      fail-fast: false
-      matrix:
-        scalar_double: [ "OFF", "ON" ]
-        compiler: ["GCC", "Clang"]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install Dependencies
-        run: >
-          sudo apt-get update -qq
-
-          sudo apt-get install -qy cmake ninja-build
-          libqt5svg5-dev libqt5opengl5-dev qtbase5-dev qttools5-dev qttools5-dev-tools libqt5websockets5-dev
-          libtbb-dev
-          libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
-          libboost-program-options-dev libboost-thread-dev
-          libeigen3-dev
-          libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev
-          libdlib-dev libproj-dev libxerces-c-dev xvfb libjsoncpp-dev liblaszip-dev
-
-      - name: Setup GCC
-        if: matrix.compiler == 'GCC'
-        run: |
-          echo "CC=gcc" >> $GITHUB_ENV
-          echo "CXX=g++" >> $GITHUB_ENV
-
-      - name: Setup Clang
-        if: matrix.compiler == 'Clang'
-        run: |
-          echo "CC=clang" >> $GITHUB_ENV
-          echo "CXX=clang++" >> $GITHUB_ENV
-
-      - name: Configure cmake
-        run: >
-          mkdir build
-
-          cmake
-          -B build
-          -S .
-          -G Ninja
-          -DEIGEN_ROOT_DIR=/usr/include/eigen3
-          -DJSON_ROOT_DIR=/usr/include/jsoncpp
-          -DDLIB_ROOT=/usr/include
-          -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }}
-          -DCCCORELIB_USE_TBB=ON
-          -DPLUGIN_EXAMPLE_GL=ON
-          -DPLUGIN_EXAMPLE_IO=ON
-          -DPLUGIN_EXAMPLE_STANDARD=ON
-          -DPLUGIN_GL_QEDL=ON
-          -DPLUGIN_GL_QSSAO=ON
-          -DPLUGIN_IO_QADDITIONAL=ON
-          -DPLUGIN_IO_QCORE=ON
-          -DPLUGIN_IO_QE57=ON
-          -DE57_RELEASE_LTO=OFF
-          -DPLUGIN_IO_QPHOTOSCAN=ON
-          -DPLUGIN_IO_QLAS=ON
-          -DPLUGIN_IO_QRDB=ON
-          -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON
-          -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON
-          -DPLUGIN_STANDARD_QANIMATION=ON
-          -DQANIMATION_WITH_FFMPEG_SUPPORT=OFF
-          -DPLUGIN_STANDARD_QBROOM=ON
-          -DPLUGIN_STANDARD_QCANUPO=ON
-          -DPLUGIN_STANDARD_QCOMPASS=ON
-          -DPLUGIN_STANDARD_QCSF=ON
-          -DPLUGIN_STANDARD_QFACETS=ON
-          -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON
-          -DPLUGIN_STANDARD_QHPR=ON
-          -DPLUGIN_STANDARD_QM3C2=ON
-          -DPLUGIN_STANDARD_QPCV=ON
-          -DPLUGIN_STANDARD_QPOISSON_RECON=ON
-          -DPLUGIN_STANDARD_QSRA=ON
-          -DPLUGIN_STANDARD_QRANSAC_SD=ON
-          -DPLUGIN_STANDARD_QPCL=ON
-          -DPLUGIN_STANDARD_QCLOUDLAYERS=ON
-          -DPLUGIN_STANDARD_QVOXFALL=ON
-          -DBUILD_TESTING=ON
-
-      - name: Build
-        run: cmake --build build --parallel
-
-      - name: Test
-        run: xvfb-run ctest --test-dir build
-
-      - name: Install
-        run: sudo cmake --install build
+          path: CloudCompare.tar
