@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scalar_double: [ "OFF", "ON" ]
+        scalar_double: [ "ON" ]
         config:
           - {
             name: "Windows MSVC",
@@ -106,11 +106,8 @@ jobs:
       - name: Install (Windows)
         if: matrix.config.os == 'windows-latest'
         run: cmake --install build
-
-      - name: tarFiles
-        run: tar -cvf CloudCompare.tar C:/Program Files (x86)/CloudCompareProjects/CloudCompare
-
+        
       - name: CloudCompare-Release
         uses: softprops/action-gh-release@v1
         with:
-          path: CloudCompare.tar
+          path: C:/Program Files (x86)/CloudCompareProjects/CloudCompare
