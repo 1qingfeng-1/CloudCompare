@@ -27,7 +27,17 @@ jobs:
         with:
           submodules: recursive
 
-      # DGM: without caching, using conda on Windows takes a long time...
+      # 缓存 Conda 环境
+      - name: Cache Conda
+        uses: actions/cache@v3
+        with:
+          path: |
+            C:\Users\runneradmin\.conda
+            C:\Users\runneradmin\.condarc
+            C:\Users\runneradmin\miniconda3\pkgs
+            C:\Users\runneradmin\miniconda3\envs
+          key: ${{ runner.os }}-conda-${{ hashFiles(matrix.config.conda_dep_file) }}
+
       - name: Install Dependencies
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -35,6 +45,7 @@ jobs:
           activate-environment: CloudCompareDev
           auto-activate-base: false
           environment-file: ${{ matrix.config.conda_dep_file }}
+          python-version: 3.8
 
       - name: Configure MSVC console (Windows)
         if: matrix.config.os == 'windows-latest'
@@ -106,8 +117,9 @@ jobs:
       - name: Install (Windows)
         if: matrix.config.os == 'windows-latest'
         run: cmake --install build
-        
-      - name: CloudCompare-Release
-        uses: softprops/action-gh-release@v1
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
         with:
+          name: CloudCompareBuild
           path: C:/Program Files (x86)/CloudCompareProjects/CloudCompare
